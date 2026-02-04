@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Notes + Summary</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Processed Notes</h1>
+      <div class="meta">Note ID: {{ note_id }}</div>
+
+      <section class="card">
+        <h2>Title</h2>
+        <p>{{ notes.title or 'None' }}</p>
+      </section>
+
+      <section class="card">
+        <h2>Key Points</h2>
+        {% if notes.key_points %}
+        <ul>
+          {% for item in notes.key_points %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>None</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>Action Items</h2>
+        {% if notes.action_items %}
+        <ul>
+          {% for item in notes.action_items %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>None</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>Definitions</h2>
+        {% if notes.definitions %}
+        <ul>
+          {% for item in notes.definitions %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>None</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>Examples</h2>
+        {% if notes.examples %}
+        <ul>
+          {% for item in notes.examples %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>None</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>Summary</h2>
+        <pre class="summary">{{ notes.summary or 'None' }}</pre>
+      </section>
+
+      <div class="actions">
+        <a class="button" href="/export/markdown/{{ note_id }}">Download Markdown</a>
+        <a class="button" href="/export/pdf/{{ note_id }}">Download PDF</a>
+        <a class="button secondary" href="/">Process another</a>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Notes + Summary</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>AI Notes + Summary</h1>
+      <form method="POST" action="/process" class="card">
+        <label for="text">Input Text</label>
+        <textarea id="text" name="text" rows="12" placeholder="Paste your notes here..."></textarea>
+
+        <label for="summary_mode">Summary Mode</label>
+        <select id="summary_mode" name="summary_mode">
+          <option value="short">Short</option>
+          <option value="detailed">Detailed</option>
+          <option value="bullet">Bullet</option>
+        </select>
+
+        <button type="submit">Process</button>
+      </form>
+    </main>
+  </body>
+</html>
