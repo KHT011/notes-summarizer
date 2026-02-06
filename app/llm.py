@@ -20,18 +20,18 @@ def run_llm(raw_text: str, summary_mode: str, strict: bool = False) -> str:
 
     if SETTINGS.llm_provider == "ollama":
         return _run_ollama(system_prompt, user_prompt)
-    if SETTINGS.llm_provider == "openai":
-        return _run_openai(system_prompt, user_prompt)
+    if SETTINGS.llm_provider == "mistral":
+        return _run_mistral(system_prompt, user_prompt)
 
     raise LLMError(f"Unsupported LLM provider: {SETTINGS.llm_provider}")
 
 
-def _run_openai(system_prompt: str, user_prompt: str) -> str:
-    if not SETTINGS.openai_api_key:
-        raise LLMError("OPENAI_API_KEY is not set")
+def _run_mistral(system_prompt: str, user_prompt: str) -> str:
+    if not SETTINGS.mistral_api_key:
+        raise LLMError("MISTRAL_API_KEY is not set")
 
     payload = {
-        "model": SETTINGS.openai_model,
+        "model": SETTINGS.mistral_model,
         "temperature": min(max(SETTINGS.temperature, 0.0), 0.2),
         "messages": [
             {"role": "system", "content": system_prompt},
@@ -39,8 +39,8 @@ def _run_openai(system_prompt: str, user_prompt: str) -> str:
         ],
     }
 
-    headers = {"Authorization": f"Bearer {SETTINGS.openai_api_key}"}
-    url = f"{SETTINGS.openai_base_url.rstrip('/')}/chat/completions"
+    headers = {"Authorization": f"Bearer {SETTINGS.mistral_api_key}"}
+    url = f"{SETTINGS.mistral_base_url.rstrip('/')}/chat/completions"
 
     try:
         with httpx.Client(timeout=60) as client:

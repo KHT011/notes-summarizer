@@ -10,11 +10,21 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Set your LLM credentials:
+## Configure with .env
 
-```powershell
-$env:OPENAI_API_KEY="your-key"
-$env:OPENAI_MODEL="gpt-4.1-mini"
+Create or update `.env` in the project root (see `.env.example`), then set:
+
+```text
+LLM_PROVIDER=mistral
+MISTRAL_API_KEY=your-key
+MISTRAL_BASE_URL=https://api.mistral.ai/v1
+MISTRAL_MODEL=mistral-small-latest
+LLM_TEMPERATURE=0.2
+
+# Optional: Ollama fallback
+# LLM_PROVIDER=ollama
+# OLLAMA_HOST=http://localhost:11434
+# OLLAMA_MODEL=llama3.2
 ```
 
 Run the server:
@@ -24,16 +34,6 @@ uvicorn app.main:app --reload
 ```
 
 Open `http://127.0.0.1:8000`.
-
-## PDF Export
-
-PDF export uses WeasyPrint. Install it separately if you need it:
-
-```powershell
-pip install -r requirements-pdf.txt
-```
-
-If WeasyPrint is not installed, `/export/pdf/{note_id}` returns HTTP 501.
 
 ## API
 
