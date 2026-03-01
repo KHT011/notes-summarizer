@@ -1,6 +1,6 @@
 # AI Notes + Summary
 
-Production-oriented implementation of the deterministic notes + summary system.
+Production-oriented implementation of a deterministic notes and summary pipeline with strict schema validation and export support.
 
 ## Quickstart
 
@@ -10,30 +10,44 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## Configure with .env
+## Configure `.env`
 
-Create or update `.env` in the project root (see `.env.example`), then set:
+Copy `.env.example` to `.env` and set values for the provider you want.
 
 ```text
+# one of: mistral | openai | ollama
 LLM_PROVIDER=mistral
-MISTRAL_API_KEY=your-key
+
+# shared
+LLM_TEMPERATURE=0.2
+NOTES_STORAGE_PATH=data/notes.jsonl
+
+# mistral
+MISTRAL_API_KEY=your-mistral-key
 MISTRAL_BASE_URL=https://api.mistral.ai/v1
 MISTRAL_MODEL=mistral-small-latest
-LLM_TEMPERATURE=0.2
 
-# Optional: Ollama fallback
-# LLM_PROVIDER=ollama
-# OLLAMA_HOST=http://localhost:11434
-# OLLAMA_MODEL=llama3.2
+# openai
+OPENAI_API_KEY=your-openai-key
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4.1-mini
+
+# ollama
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=llama3.2
 ```
 
-Run the server:
+## Run
 
 ```powershell
 uvicorn app.main:app --reload
 ```
 
 Open `http://127.0.0.1:8000`.
+
+## UI
+
+The form includes an `LLM Provider` dropdown. That selection is used per request and overrides the default `LLM_PROVIDER` from `.env` for that single submission.
 
 ## API
 
@@ -42,9 +56,12 @@ Open `http://127.0.0.1:8000`.
 ```json
 {
   "text": "string",
-  "summary_mode": "short | detailed | bullet"
+  "summary_mode": "short | detailed | bullet",
+  "llm_provider": "mistral | openai | ollama"
 }
 ```
+
+`llm_provider` is optional. If omitted, the app uses `.env` default `LLM_PROVIDER`.
 
 Response:
 
@@ -61,4 +78,18 @@ Response:
 }
 ```
 
-The response includes `X-Notes-Id` and `X-Notes-Stored-At` headers for exports.
+Response headers include `X-Notes-Id` and `X-Notes-Stored-At`.
+
+## PDF Export
+
+Install optional PDF dependencies:
+
+```powershell
+pip install -r requirements-pdf.txt
+```
+
+Export endpoints:
+- `GET /export/markdown/{note_id}`
+- `GET /export/pdf/{note_id}`
+
+If PDF dependencies are missing, `/export/pdf/{note_id}` returns `501`.
