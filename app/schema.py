@@ -16,6 +16,7 @@ class NotesOutput(BaseModel):
 class ProcessRequest(BaseModel):
     text: str = Field(default="")
     summary_mode: str = Field(default="short")
+    llm_provider: str | None = Field(default=None)
 
     @field_validator("summary_mode")
     @classmethod
@@ -23,6 +24,16 @@ class ProcessRequest(BaseModel):
         allowed = {"short", "detailed", "bullet"}
         if value not in allowed:
             raise ValueError("summary_mode must be short, detailed, or bullet")
+        return value
+
+    @field_validator("llm_provider")
+    @classmethod
+    def validate_llm_provider(cls, value: str | None) -> str | None:
+        if value is None or value == "":
+            return None
+        allowed = {"mistral", "ollama", "openai"}
+        if value not in allowed:
+            raise ValueError("llm_provider must be mistral, ollama, or openai")
         return value
 
 

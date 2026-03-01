@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from .config import SETTINGS
 from .core import ValidationError, process_notes
 from .exporter import PdfExportUnavailable, export_markdown, export_pdf
 from .schema import NotesOutput, ProcessRequest, ProcessResponse
@@ -22,6 +23,7 @@ def index(request: Request) -> HTMLResponse:
         "index.html",
         {
             "request": request,
+            "default_llm_provider": SETTINGS.llm_provider,
         },
     )
 
@@ -34,7 +36,7 @@ async def process(request: Request) -> Response:
     if "application/json" in content_type:
         payload = await request.json()
         data = ProcessRequest(**payload)
-        notes, record = process_notes(data.text, data.summary_mode)
+        notes, record = process_notes(data.text, data.summary_mode, data.llm_provider)
         response = ProcessResponse(notes=notes)
         headers = {
             "X-Notes-Id": record["id"],
@@ -45,8 +47,9 @@ async def process(request: Request) -> Response:
     form = await request.form()
     text = str(form.get("text", ""))
     summary_mode = str(form.get("summary_mode", "short"))
-    data = ProcessRequest(text=text, summary_mode=summary_mode)
-    notes, record = process_notes(data.text, data.summary_mode)
+    llm_provider = str(form.get("llm_provider", "")).strip() or None
+    data = ProcessRequest(text=text, summary_mode=summary_mode, llm_provider=llm_provider)
+    notes, record = process_notes(data.text, data.summary_mode, data.llm_provider)
 
     if "text/html" in accept or "application/json" not in accept:
         return templates.TemplateResponse(

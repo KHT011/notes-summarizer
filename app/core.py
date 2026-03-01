@@ -28,7 +28,7 @@ def validate_notes(notes: NotesOutput) -> NotesOutput:
     return notes
 
 
-def process_notes(input_text: str, summary_mode: str) -> tuple[NotesOutput, dict]:
+def process_notes(input_text: str, summary_mode: str, llm_provider: str | None = None) -> tuple[NotesOutput, dict]:
     cleaned = preprocess(input_text)
 
     if not cleaned:
@@ -40,16 +40,16 @@ def process_notes(input_text: str, summary_mode: str) -> tuple[NotesOutput, dict
             examples=None,
             summary=None,
         )
-        record = save_notes(cleaned, summary_mode, notes, SETTINGS.prompt_version)
+        record = save_notes(cleaned, summary_mode, notes, SETTINGS.prompt_version, llm_provider)
         return notes, record
 
     last_error: Exception | None = None
     for attempt in range(2):
         try:
-            llm_output = run_llm(cleaned, summary_mode, strict=attempt > 0)
+            llm_output = run_llm(cleaned, summary_mode, strict=attempt > 0, llm_provider=llm_provider)
             notes = parse_llm_output(llm_output)
             notes = validate_notes(notes)
-            record = save_notes(cleaned, summary_mode, notes, SETTINGS.prompt_version)
+            record = save_notes(cleaned, summary_mode, notes, SETTINGS.prompt_version, llm_provider)
             return notes, record
         except (LLMError, ParseError, ValidationError) as exc:
             last_error = exc

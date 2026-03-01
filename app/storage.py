@@ -10,12 +10,19 @@ from .config import SETTINGS
 from .schema import NotesOutput
 
 
-def save_notes(input_text: str, summary_mode: str, notes: NotesOutput, prompt_version: str) -> Dict[str, Any]:
+def save_notes(
+    input_text: str,
+    summary_mode: str,
+    notes: NotesOutput,
+    prompt_version: str,
+    llm_provider: str | None = None,
+) -> Dict[str, Any]:
     record = {
         "id": str(uuid4()),
         "stored_at": datetime.now(timezone.utc).isoformat(),
         "prompt_version": prompt_version,
         "summary_mode": summary_mode,
+        "llm_provider": llm_provider or SETTINGS.llm_provider,
         "input_text": input_text,
         "notes": notes.model_dump(),
     }

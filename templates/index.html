@@ -13,6 +13,13 @@
         <label for="text">Input Text</label>
         <textarea id="text" name="text" rows="12" placeholder="Paste your notes here..."></textarea>
 
+        <label for="llm_provider">LLM Provider</label>
+        <select id="llm_provider" name="llm_provider">
+          <option value="mistral" {% if default_llm_provider == 'mistral' %}selected{% endif %}>Mistral</option>
+          <option value="ollama" {% if default_llm_provider == 'ollama' %}selected{% endif %}>Ollama (Llama 3.2)</option>
+          <option value="openai" {% if default_llm_provider == 'openai' %}selected{% endif %}>OpenAI</option>
+        </select>
+
         <label for="summary_mode">Summary Mode</label>
         <select id="summary_mode" name="summary_mode">
           <option value="short">Short</option>
