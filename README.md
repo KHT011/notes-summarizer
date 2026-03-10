@@ -55,7 +55,7 @@ app/
 	prompt.py     # system/user prompt templates
 data/
 	notes.jsonl   # append-only note records
-	templates/
+templates/
 	index.html    # input form
 	result.html   # rendered output + export links
 static/
@@ -67,22 +67,10 @@ static/
 ### 1. Clone and create a virtual environment
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/KHT011/notes-summarizer.git
 cd notes-summarizer
-python -m venv .venv
 ```
 
-Windows (PowerShell):
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-macOS/Linux:
-
-```bash
-source .venv/bin/activate
-```
 
 ### 2. Install dependencies
 
@@ -213,6 +201,3 @@ Each stored note includes:
 - PDF export `501`: install/repair WeasyPrint runtime dependencies.
 - Empty or malformed output: try another provider/model or shorter input blocks.
 
-## License
-
-Add your preferred license (for example, MIT) to this repository.
