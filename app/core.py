@@ -4,7 +4,7 @@ from .config import SETTINGS
 from .llm import LLMError, run_llm
 from .notes import ParseError, normalize_notes, parse_llm_output
 from .schema import NotesOutput
-from .storage import save_notes
+from .storage import create_pending
 
 
 class ValidationError(RuntimeError):
@@ -40,7 +40,7 @@ def process_notes(input_text: str, summary_mode: str, llm_provider: str | None =
             examples=None,
             summary=None,
         )
-        record = save_notes(cleaned, summary_mode, notes, SETTINGS.prompt_version, llm_provider)
+        record = create_pending(cleaned, summary_mode, notes, SETTINGS.prompt_version, llm_provider)
         return notes, record
 
     last_error: Exception | None = None
@@ -49,7 +49,7 @@ def process_notes(input_text: str, summary_mode: str, llm_provider: str | None =
             llm_output = run_llm(cleaned, summary_mode, strict=attempt > 0, llm_provider=llm_provider)
             notes = parse_llm_output(llm_output)
             notes = validate_notes(notes)
-            record = save_notes(cleaned, summary_mode, notes, SETTINGS.prompt_version, llm_provider)
+            record = create_pending(cleaned, summary_mode, notes, SETTINGS.prompt_version, llm_provider)
             return notes, record
         except (LLMError, ParseError, ValidationError) as exc:
             last_error = exc

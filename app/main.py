@@ -9,7 +9,7 @@ from .config import SETTINGS
 from .core import ValidationError, process_notes
 from .exporter import PdfExportUnavailable, export_markdown, export_pdf
 from .schema import NotesOutput, ProcessRequest, ProcessResponse
-from .storage import load_notes
+from .storage import get_pending, load_notes, pop_pending, save_notes
 
 app = FastAPI(title="AI Notes + Summary")
 
@@ -73,11 +73,24 @@ async def process(request: Request) -> Response:
 def export_markdown_route(note_id: str) -> Response:
     record = load_notes(note_id)
     if not record:
-        raise HTTPException(status_code=404, detail="Note not found")
-    notes = record.get("notes")
-    if not notes:
-        raise HTTPException(status_code=404, detail="Notes not found")
-    markdown_text = export_markdown(NotesOutput(**notes))
+        pending = get_pending(note_id)
+        if not pending:
+            raise HTTPException(status_code=404, detail="Note not found")
+        notes = NotesOutput(**pending["notes"])
+        save_notes(
+            pending["input_text"],
+            pending["summary_mode"],
+            notes,
+            pending["prompt_version"],
+            pending.get("llm_provider"),
+            note_id=pending["id"],
+            stored_at=pending["stored_at"],
+        )
+        pop_pending(note_id)
+    else:
+        notes = NotesOutput(**record["notes"])
+
+    markdown_text = export_markdown(notes)
     return PlainTextResponse(markdown_text, media_type="text/markdown")
 
 
@@ -85,12 +98,25 @@ def export_markdown_route(note_id: str) -> Response:
 def export_pdf_route(note_id: str) -> Response:
     record = load_notes(note_id)
     if not record:
-        raise HTTPException(status_code=404, detail="Note not found")
-    notes = record.get("notes")
-    if not notes:
-        raise HTTPException(status_code=404, detail="Notes not found")
+        pending = get_pending(note_id)
+        if not pending:
+            raise HTTPException(status_code=404, detail="Note not found")
+        notes = NotesOutput(**pending["notes"])
+        save_notes(
+            pending["input_text"],
+            pending["summary_mode"],
+            notes,
+            pending["prompt_version"],
+            pending.get("llm_provider"),
+            note_id=pending["id"],
+            stored_at=pending["stored_at"],
+        )
+        pop_pending(note_id)
+    else:
+        notes = NotesOutput(**record["notes"])
+
     try:
-        pdf_bytes = export_pdf(NotesOutput(**notes))
+        pdf_bytes = export_pdf(notes)
     except PdfExportUnavailable as exc:
         raise HTTPException(status_code=501, detail=str(exc))
     return Response(content=pdf_bytes, media_type="application/pdf")

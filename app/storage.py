@@ -9,8 +9,10 @@ from uuid import uuid4
 from .config import SETTINGS
 from .schema import NotesOutput
 
+PENDING_NOTES: Dict[str, Dict[str, Any]] = {}
 
-def save_notes(
+
+def create_pending(
     input_text: str,
     summary_mode: str,
     notes: NotesOutput,
@@ -20,6 +22,29 @@ def save_notes(
     record = {
         "id": str(uuid4()),
         "stored_at": datetime.now(timezone.utc).isoformat(),
+        "prompt_version": prompt_version,
+        "summary_mode": summary_mode,
+        "llm_provider": llm_provider or SETTINGS.llm_provider,
+        "input_text": input_text,
+        "notes": notes.model_dump(),
+        "pending": True,
+    }
+    PENDING_NOTES[record["id"]] = record
+    return record
+
+
+def save_notes(
+    input_text: str,
+    summary_mode: str,
+    notes: NotesOutput,
+    prompt_version: str,
+    llm_provider: str | None = None,
+    note_id: str | None = None,
+    stored_at: str | None = None,
+) -> Dict[str, Any]:
+    record = {
+        "id": note_id or str(uuid4()),
+        "stored_at": stored_at or datetime.now(timezone.utc).isoformat(),
         "prompt_version": prompt_version,
         "summary_mode": summary_mode,
         "llm_provider": llm_provider or SETTINGS.llm_provider,
@@ -47,3 +72,11 @@ def load_notes(note_id: str) -> Optional[Dict[str, Any]]:
             if record.get("id") == note_id:
                 return record
     return None
+
+
+def get_pending(note_id: str) -> Optional[Dict[str, Any]]:
+    return PENDING_NOTES.get(note_id)
+
+
+def pop_pending(note_id: str) -> Optional[Dict[str, Any]]:
+    return PENDING_NOTES.pop(note_id, None)
